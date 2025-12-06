@@ -1,0 +1,115 @@
+﻿<Window x:Class="FileBatchTool.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="File Batch Tool" Height="450" Width="800"
+        WindowStartupLocation="CenterScreen">
+    <Grid Margin="10">
+        <TabControl>
+            <TabItem Header="Batch copy / rename">
+                <Grid Margin="5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,5">
+                        <Button x:Name="btnAddFiles" Content="Add files..."
+                                Click="btnAddFiles_Click" Margin="0,0,5,0" Padding="10,2"/>
+                        <Button x:Name="btnClearFiles" Content="Clear"
+                                Click="btnClearFiles_Click" Padding="10,2"/>
+                    </StackPanel>
+
+                    <ListBox x:Name="lstFiles"
+                        Grid.Row="1"
+                        Margin="0,0,0,5"
+                        AllowDrop="True"
+                        DragOver="lstFiles_DragOver"
+                        Drop="lstFiles_Drop"/>
+
+
+                    <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,0,0,5">
+                        <Label Content="New extension:" VerticalAlignment="Center"/>
+                        <TextBox x:Name="txtNewExtension" Width="80" Margin="5,0,0,0" Text=".txt"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="3" Margin="0,0,0,5">
+                        <CheckBox x:Name="chkCopyMode"
+                            Content="Make copies (do not rename originals)"
+                            IsChecked="True"
+                            Margin="0,0,0,2"/>
+
+                        <CheckBox x:Name="chkCopyToClipboard"
+                            Content="Copy resulting file paths to clipboard"
+                            IsChecked="True"/>
+                    </StackPanel>
+
+
+                    <StackPanel Orientation="Horizontal" Grid.Row="4">
+                        <Button x:Name="btnRun"
+                            Content="Run"
+                            Click="btnRun_Click"
+                            Padding="15,2"
+                            IsDefault="True"/>
+
+                        <TextBlock x:Name="txtStatusBatch" Margin="10,0,0,0"
+                                   VerticalAlignment="Center"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Create file">
+                <Grid Margin="5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,5">
+                        <Label Content="Directory:" VerticalAlignment="Center"/>
+                        <TextBox x:Name="txtDirectory" Margin="5,0,0,0" MinWidth="300"/>
+                        <Button x:Name="btnBrowseDirectory" Content="Browse..."
+                                Margin="5,0,0,0" Padding="10,2"
+                                Click="btnBrowseDirectory_Click"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,0,0,5">
+                        <Label Content="File name:" VerticalAlignment="Center"/>
+                        <TextBox x:Name="txtFileName" Margin="5,0,0,0" MinWidth="150" Text="test.m"/>
+                    </StackPanel>
+
+                    <Grid Grid.Row="2" Margin="0,0,0,5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Label Content="Content:" Grid.Row="0"/>
+                        <TextBox x:Name="txtFileContent" Grid.Row="1" AcceptsReturn="True"
+                                 VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/>
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" Grid.Row="3">
+                        <Button x:Name="btnCreateFile" Content="Create file"
+                            Click="btnCreateFile_Click" Padding="15,2"/>
+                        <Button x:Name="btnClearCreate" Content="Clear"
+                            Click="btnClearCreate_Click" Margin="5,0,0,0" Padding="10,2"/>
+                        <TextBlock x:Name="txtStatusCreate" Margin="10,0,0,0"
+                            VerticalAlignment="Center"
+                            TextWrapping="Wrap"/>
+                    </StackPanel>
+
+                </Grid>
+            </TabItem>
+
+        </TabControl>
+        <Button x:Name="btnCloseHidden"
+            IsCancel="True"
+            Visibility="Collapsed"
+            Click="btnCloseHidden_Click"/>
+    </Grid>
+</Window>
