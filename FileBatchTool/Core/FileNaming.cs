@@ -7,14 +7,14 @@ namespace FileBatchTool.Core;
 
 public static class FileNaming
 {
-    public static string ChangeExtension(string path, string newExtension) {
+    public static string ChangeExtension(string path, string newExtension)
+    {
         ArgumentNullException.ThrowIfNull(path);
-        if (string.IsNullOrWhiteSpace(newExtension))
-            throw new ArgumentException("New extension must not be empty.", nameof(newExtension));
 
-        var ext = newExtension.StartsWith('.') ? newExtension : "." + newExtension;
+        var ext = NormalizeExtension(newExtension);
         return Path.ChangeExtension(path, ext);
     }
+
 
     public static IReadOnlyList<FileOperation> BuildOperations(
         IEnumerable<string> sourceFiles
@@ -41,5 +41,14 @@ public static class FileNaming
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
     }
+
+    public static string NormalizeExtension(string newExtension)
+    {
+        if (string.IsNullOrWhiteSpace(newExtension))
+            throw new ArgumentException("New extension must not be empty.", nameof(newExtension));
+
+        return newExtension.StartsWith('.') ? newExtension : "." + newExtension;
+    }
+
 
 }
