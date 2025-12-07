@@ -9,57 +9,86 @@
                 <Grid Margin="5">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
+                        <!-- Directory -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Source ext + recursive + load -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Add/Clear buttons -->
                         <RowDefinition Height="*"/>
+                        <!-- Files list -->
                         <RowDefinition Height="Auto"/>
+                        <!-- New extension -->
                         <RowDefinition Height="Auto"/>
+                        <!-- Copy mode + clipboard -->
                         <RowDefinition Height="Auto"/>
+                        <!-- Run + status -->
                     </Grid.RowDefinitions>
 
                     <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,5">
+                        <Label Content="Directory:" VerticalAlignment="Center"/>
+                        <TextBox x:Name="txtBatchDirectory" Margin="5,0,0,0" MinWidth="300"/>
+                        <Button x:Name="btnBrowseBatchDirectory" Content="Browse..."
+                    Margin="5,0,0,0" Padding="10,2"
+                    Click="btnBrowseBatchDirectory_Click"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,0,0,5">
+                        <Label Content="Source extension:" VerticalAlignment="Center"/>
+                        <TextBox x:Name="txtBatchSourceExtension" Margin="5,0,0,0" Width="80" Text=".m"/>
+                        <CheckBox x:Name="chkBatchRecursive"
+                      Content="Include subdirectories"
+                      IsChecked="True"
+                      Margin="10,0,0,0"
+                      VerticalAlignment="Center"/>
+                        <Button x:Name="btnLoadFromDirectory" Content="Load from directory"
+                    Margin="10,0,0,0" Padding="10,2"
+                    Click="btnLoadFromDirectory_Click"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,0,0,5">
                         <Button x:Name="btnAddFiles" Content="Add files..."
-                                Click="btnAddFiles_Click" Margin="0,0,5,0" Padding="10,2"/>
+                    Click="btnAddFiles_Click" Margin="0,0,5,0" Padding="10,2"/>
                         <Button x:Name="btnClearFiles" Content="Clear"
-                                Click="btnClearFiles_Click" Padding="10,2"/>
+                    Click="btnClearFiles_Click" Padding="10,2"/>
                     </StackPanel>
 
                     <ListBox x:Name="lstFiles"
-                        Grid.Row="1"
-                        Margin="0,0,0,5"
-                        AllowDrop="True"
-                        DragOver="lstFiles_DragOver"
-                        Drop="lstFiles_Drop"/>
+                 Grid.Row="3"
+                 Margin="0,0,0,5"
+                 AllowDrop="True"
+                 DragOver="lstFiles_DragOver"
+                 Drop="lstFiles_Drop"/>
 
-
-                    <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,0,0,5">
+                    <!-- Новое (целевое) расширение -->
+                    <StackPanel Orientation="Horizontal" Grid.Row="4" Margin="0,0,0,5">
                         <Label Content="New extension:" VerticalAlignment="Center"/>
                         <TextBox x:Name="txtNewExtension" Width="80" Margin="5,0,0,0" Text=".txt"/>
                     </StackPanel>
 
-                    <StackPanel Grid.Row="3" Margin="0,0,0,5">
+                    <!-- Режим операции + помещать в буфер -->
+                    <StackPanel Grid.Row="5" Margin="0,0,0,5">
                         <CheckBox x:Name="chkCopyMode"
-                            Content="Make copies (do not rename originals)"
-                            IsChecked="True"
-                            Margin="0,0,0,2"/>
-
+                      Content="Make copies (do not rename originals)"
+                      IsChecked="True"
+                      Margin="0,0,0,2"/>
                         <CheckBox x:Name="chkCopyToClipboard"
-                            Content="Copy resulting file paths to clipboard"
-                            IsChecked="True"/>
+                      Content="Copy resulting file paths to clipboard"
+                      IsChecked="True"/>
                     </StackPanel>
 
-
-                    <StackPanel Orientation="Horizontal" Grid.Row="4">
-                        <Button x:Name="btnRun"
-                            Content="Run"
-                            Click="btnRun_Click"
-                            Padding="15,2"
-                            IsDefault="True"/>
-
+                    <!-- Запуск и статус -->
+                    <StackPanel Orientation="Horizontal" Grid.Row="6">
+                        <Button x:Name="btnRun" Content="Run"
+                    Click="btnRun_Click"
+                    Padding="15,2"
+                    IsDefault="True"/>
                         <TextBlock x:Name="txtStatusBatch" Margin="10,0,0,0"
-                                   VerticalAlignment="Center"
-                                   TextWrapping="Wrap"/>
+                       VerticalAlignment="Center"
+                       TextWrapping="Wrap"/>
                     </StackPanel>
                 </Grid>
             </TabItem>
+
 
             <TabItem Header="Create file">
                 <Grid Margin="5">

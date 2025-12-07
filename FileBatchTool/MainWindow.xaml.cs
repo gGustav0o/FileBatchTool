@@ -91,6 +91,78 @@ public partial class MainWindow : Window
             txtDeleteDirectory.Text = dlg.SelectedPath;
         }
     }
+    private void btnBrowseBatchDirectory_Click(object sender, RoutedEventArgs e)
+    {
+        using var dlg = new WinForms.FolderBrowserDialog
+        {
+            Description = "Select directory to search files in"
+        };
+
+        var result = dlg.ShowDialog();
+        if (result == WinForms.DialogResult.OK && !string.IsNullOrWhiteSpace(dlg.SelectedPath))
+        {
+            txtBatchDirectory.Text = dlg.SelectedPath;
+        }
+    }
+    private void btnLoadFromDirectory_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var directory = txtBatchDirectory.Text?.Trim();
+            if (string.IsNullOrWhiteSpace(directory))
+            {
+                MessageBox.Show(this, "Specify directory.", "Warning",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                SetBatchStatus("Directory is not specified.", true);
+                return;
+            }
+
+            if (!Directory.Exists(directory))
+            {
+                MessageBox.Show(this, $"Directory does not exist:\n{directory}", "Warning",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                SetBatchStatus("Directory does not exist.", true);
+                return;
+            }
+
+            var sourceExt = txtBatchSourceExtension.Text?.Trim();
+            if (string.IsNullOrWhiteSpace(sourceExt))
+            {
+                MessageBox.Show(this, "Specify source extension.", "Warning",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                SetBatchStatus("Source extension is not specified.", true);
+                return;
+            }
+
+            bool recursive = chkBatchRecursive.IsChecked == true;
+
+            var files = _fileSystemService.GetFilesByExtension(directory, sourceExt, recursive);
+            if (files.Count == 0)
+            {
+                SetBatchStatus("No files found for given extension.", false);
+                lstFiles.Items.Clear();
+                return;
+            }
+
+            lstFiles.Items.Clear();
+            foreach (var path in files)
+            {
+                lstFiles.Items.Add(path);
+            }
+
+            SetBatchStatus(
+                $"Loaded {files.Count} file(s) with extension {FileNaming.NormalizeExtension(sourceExt)}.",
+                false);
+        }
+        catch (Exception ex)
+        {
+            SetBatchStatus("Error: " + ex.Message, true);
+            MessageBox.Show(this, ex.Message, "Error",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+
     private void btnDeleteByExtension_Click(object sender, RoutedEventArgs e)
     {
         try
