@@ -16,6 +16,11 @@ public partial class MainWindow : Window
     private readonly IFileSystemService _fileSystemService = new FileSystemService();
     private readonly IClipboardService _clipboardService = new ClipboardService();
 
+    private void SetStripStatus(string message, bool isError)
+    {
+        txtStatusStrip.Text = message;
+        txtStatusStrip.Foreground = isError ? Brushes.Red : Brushes.Green;
+    }
 
     public MainWindow()
     {
@@ -38,6 +43,240 @@ public partial class MainWindow : Window
         txtStatusCreate.Text = message;
         txtStatusCreate.Foreground = isError ? Brushes.Red : Brushes.Green;
     }
+    private void btnStripLoadFromDirectory_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var directory = txtStripDirectory.Text?.Trim();
+            if (string.IsNullOrWhiteSpace(directory))
+            {
+                MessageBox.Show(this, "Specify directory.", "Warning",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                SetStripStatus("Directory is not specified.", true);
+                return;
+            }
+
+            if (!Directory.Exists(directory))
+            {
+                MessageBox.Show(this, $"Directory does not exist:\n{directory}", "Warning",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                SetStripStatus("Directory does not exist.", true);
+                return;
+            }
+
+            var extension = txtStripExtension.Text?.Trim();
+            if (string.IsNullOrWhiteSpace(extension))
+            {
+                MessageBox.Show(this, "Specify extension.", "Warning",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                SetStripStatus("Extension is not specified.", true);
+                return;
+            }
+
+            bool recursive = chkStripRecursive.IsChecked == true;
+
+            var files = _fileSystemService.GetFilesByExtension(directory, extension, recursive);
+            if (files.Count == 0)
+            {
+                lstStripFiles.Items.Clear();
+                SetStripStatus("No files found for given extension.", false);
+                return;
+            }
+
+            lstStripFiles.Items.Clear();
+            foreach (var path in files)
+                lstStripFiles.Items.Add(path);
+
+            SetStripStatus(
+                $"Loaded {files.Count} file(s) with extension {FileNaming.NormalizeExtension(extension)}.",
+                false);
+        }
+        catch (Exception ex)
+        {
+            SetStripStatus("Error: " + ex.Message, true);
+            MessageBox.Show(this, ex.Message, "Error",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void btnStripAddFiles_Click(object sender, RoutedEventArgs e)
+    {
+        var dlg = new Microsoft.Win32.OpenFileDialog
+        {
+            Multiselect = true,
+            Title = "Select files"
+        };
+
+        if (dlg.ShowDialog(this) == true)
+        {
+            foreach (var file in dlg.FileNames)
+            {
+                if (!lstStripFiles.Items.Contains(file))
+                    lstStripFiles.Items.Add(file);
+            }
+
+            SetStripStatus($"{lstStripFiles.Items.Count} file(s) selected.", false);
+        }
+    }
+    private void btnStripRun_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (lstStripFiles.Items.Count == 0)
+            {
+                MessageBox.Show(this, "No files selected.", "Warning",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                SetStripStatus("No files selected.", true);
+                return;
+            }
+
+            var files = lstStripFiles.Items.Cast<string>().ToList();
+
+            var single = txtStripSingleLine.Text?.Trim();
+            var multiStart = txtStripMultiStart.Text?.Trim();
+            var multiEnd = txtStripMultiEnd.Text?.Trim();
+
+            CommentSyntax syntax;
+
+            if (string.IsNullOrWhiteSpace(single)
+                && string.IsNullOrWhiteSpace(multiStart)
+                && string.IsNullOrWhiteSpace(multiEnd))
+            {
+                var ext = Path.GetExtension(files[0]);
+                var guessed = CommentSyntax.ForExtension(ext);
+
+                if (guessed is null)
+                {
+                    SetStripStatus(
+                        "Comment syntax is not specified and cannot be guessed. " +
+                        "Fill syntax fields manually.",
+                        true);
+                    return;
+                }
+
+                syntax = guessed;
+
+                txtStripSingleLine.Text = syntax.SingleLine ?? string.Empty;
+                txtStripMultiStart.Text = syntax.MultiLineStart ?? string.Empty;
+                txtStripMultiEnd.Text = syntax.MultiLineEnd ?? string.Empty;
+            }
+            else
+            {
+                syntax = new CommentSyntax(single, multiStart, multiEnd);
+            }
+
+            var keepFlag = txtStripKeepFlag.Text;
+            if (keepFlag is not null && keepFlag.Length == 0)
+                keepFlag = null;
+
+            int processed = 0;
+            int changed = 0;
+            int failed = 0;
+
+            foreach (var path in files)
+            {
+                try
+                {
+                    var original = _fileSystemService.ReadAllText(path);
+                    var cleaned = CommentCleaner.RemoveCommentsExceptFlagged(
+                        original, syntax, keepFlag);
+
+                    if (!string.Equals(original, cleaned, StringComparison.Ordinal))
+                    {
+                        _fileSystemService.WriteAllText(path, cleaned);
+                        changed++;
+                    }
+
+                    processed++;
+                }
+                catch
+                {
+                    failed++;
+                }
+            }
+
+            if (failed == 0)
+            {
+                SetStripStatus(
+                    $"Processed {processed} file(s), modified {changed}.",
+                    false);
+            }
+            else
+            {
+                SetStripStatus(
+                    $"Processed {processed} file(s), modified {changed}, failed {failed}.",
+                    true);
+            }
+        }
+        catch (Exception ex)
+        {
+            SetStripStatus("Error: " + ex.Message, true);
+            MessageBox.Show(this, ex.Message, "Error",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void btnStripGuessSyntax_Click(object sender, RoutedEventArgs e)
+    {
+        if (lstStripFiles.Items.Count == 0)
+        {
+            SetStripStatus("No files selected to guess syntax from.", true);
+            return;
+        }
+
+        var firstPath = (string)lstStripFiles.Items[0];
+        var ext = Path.GetExtension(firstPath);
+
+        var syntax = CommentSyntax.ForExtension(ext);
+        if (syntax is null)
+        {
+            SetStripStatus($"No default comment syntax for extension '{ext}'.", true);
+            return;
+        }
+
+        txtStripSingleLine.Text = syntax.SingleLine ?? string.Empty;
+        txtStripMultiStart.Text = syntax.MultiLineStart ?? string.Empty;
+        txtStripMultiEnd.Text = syntax.MultiLineEnd ?? string.Empty;
+
+        SetStripStatus($"Comment syntax guessed for extension '{ext}'.", false);
+    }
+
+    private void lstStripFiles_Drop(object sender, System.Windows.DragEventArgs e)
+    {
+        if (!e.Data.GetDataPresent(System.Windows.DataFormats.FileDrop))
+            return;
+
+        var dropped = (string[])e.Data.GetData(System.Windows.DataFormats.FileDrop);
+
+        foreach (var path in dropped)
+        {
+            if (File.Exists(path) && !lstStripFiles.Items.Contains(path))
+                lstStripFiles.Items.Add(path);
+        }
+
+        SetStripStatus($"{lstStripFiles.Items.Count} file(s) selected.", false);
+    }
+
+    private void btnStripClearFiles_Click(object sender, RoutedEventArgs e)
+    {
+        lstStripFiles.Items.Clear();
+        SetStripStatus("File list cleared.", false);
+    }
+
+    private void btnBrowseStripDirectory_Click(object sender, RoutedEventArgs e)
+    {
+        using var dlg = new WinForms.FolderBrowserDialog
+        {
+            Description = "Select directory to search files in"
+        };
+
+        var result = dlg.ShowDialog();
+        if (result == WinForms.DialogResult.OK && !string.IsNullOrWhiteSpace(dlg.SelectedPath))
+        {
+            txtStripDirectory.Text = dlg.SelectedPath;
+        }
+    }
+
 
     private void btnClearCreate_Click(object sender, RoutedEventArgs e)
     {

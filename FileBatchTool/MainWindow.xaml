@@ -173,6 +173,103 @@
                 </Grid>
             </TabItem>
 
+            <TabItem Header="Strip comments">
+                <Grid Margin="5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <!-- Directory -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Extension + recursive + load -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Add/Clear -->
+                        <RowDefinition Height="*"/>
+                        <!-- Files list -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Keep flag -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Comment syntax -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Run + status -->
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,5">
+                        <Label Content="Directory:" VerticalAlignment="Center"/>
+                        <TextBox x:Name="txtStripDirectory" Margin="5,0,0,0" MinWidth="300"/>
+                        <Button x:Name="btnBrowseStripDirectory" Content="Browse..."
+                    Margin="5,0,0,0" Padding="10,2"
+                    Click="btnBrowseStripDirectory_Click"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,0,0,5">
+                        <Label Content="Extension:" VerticalAlignment="Center"/>
+                        <TextBox x:Name="txtStripExtension" Margin="5,0,0,0" Width="80" Text=".cs"/>
+                        <CheckBox x:Name="chkStripRecursive"
+                      Content="Include subdirectories"
+                      IsChecked="True"
+                      Margin="10,0,0,0"
+                      VerticalAlignment="Center"/>
+                        <Button x:Name="btnStripLoadFromDirectory" Content="Load from directory"
+                    Margin="10,0,0,0" Padding="10,2"
+                    Click="btnStripLoadFromDirectory_Click"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,0,0,5">
+                        <Button x:Name="btnStripAddFiles" Content="Add files..."
+                    Click="btnStripAddFiles_Click" Margin="0,0,5,0" Padding="10,2"/>
+                        <Button x:Name="btnStripClearFiles" Content="Clear"
+                    Click="btnStripClearFiles_Click" Padding="10,2"/>
+                    </StackPanel>
+
+                    <ListBox x:Name="lstStripFiles"
+                 Grid.Row="3"
+                 Margin="0,0,0,5"
+                 AllowDrop="True"
+                 DragOver="lstFiles_DragOver"
+                 Drop="lstStripFiles_Drop"/>
+
+                    <StackPanel Orientation="Horizontal" Grid.Row="4" Margin="0,0,0,5">
+                        <Label Content="Keep-flag:" VerticalAlignment="Center"/>
+                        <TextBox x:Name="txtStripKeepFlag" Margin="5,0,0,0" Width="120" Text="@keep"/>
+                        <TextBlock Margin="10,0,0,0" VerticalAlignment="Center"
+                       Text="Only comments containing this substring will be preserved."/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="5" Margin="0,0,0,5">
+                        <TextBlock Text="Comment syntax:" FontWeight="Bold" Margin="0,0,0,2"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                            <Label Content="Single-line:" Width="90" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtStripSingleLine" Width="80" Margin="5,0,0,0" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                            <Label Content="Multi start:" Width="90" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtStripMultiStart" Width="80" Margin="5,0,0,0" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Multi end:" Width="90" VerticalAlignment="Center"/>
+                            <TextBox x:Name="txtStripMultiEnd" Width="80" Margin="5,0,0,0" />
+                            <Button x:Name="btnStripGuessSyntax" Content="Guess from first file"
+                        Margin="10,0,0,0" Padding="10,2"
+                        Click="btnStripGuessSyntax_Click"/>
+                        </StackPanel>
+
+                        <TextBlock Margin="0,2,0,0" FontStyle="Italic"
+                       Text="If all fields are empty, syntax will be guessed from file extension (if possible)."/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Grid.Row="6">
+                        <Button x:Name="btnStripRun" Content="Strip comments"
+                    Click="btnStripRun_Click" Padding="15,2"/>
+                        <TextBlock x:Name="txtStatusStrip" Margin="10,0,0,0"
+                       VerticalAlignment="Center"
+                       TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+
         </TabControl>
         <Button x:Name="btnCloseHidden"
             IsCancel="True"

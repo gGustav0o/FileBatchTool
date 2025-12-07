@@ -13,10 +13,30 @@ public interface IFileSystemService
 
     IReadOnlyList<string> GetFilesByExtension(string directory, string extension, bool recursive);
     int DeleteFiles(IEnumerable<string> filePaths);
+
+    string ReadAllText(string path);
+    void WriteAllText(string path, string content);
 }
+
 
 public sealed class FileSystemService : IFileSystemService
 {
+    public string ReadAllText(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            throw new ArgumentException("Path must not be empty.", nameof(path));
+
+        return File.ReadAllText(path);
+    }
+
+    public void WriteAllText(string path, string content)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            throw new ArgumentException("Path must not be empty.", nameof(path));
+
+        File.WriteAllText(path, content ?? string.Empty);
+    }
+
     public void ExecuteOperations(IEnumerable<FileOperation> operations)
     {
         ArgumentNullException.ThrowIfNull(operations);
